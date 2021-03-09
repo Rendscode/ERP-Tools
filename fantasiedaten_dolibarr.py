@@ -1,4 +1,9 @@
-# This is a sample Python script.
+# Generation of fake customer or supplier data (company name, address, employee data...)
+# purpose example: populate ERP datbase for tests
+# helpful literature:
+# https://zetcode.com/python/faker/
+# https://towardsdatascience.com/how-to-create-fake-data-with-faker-a835e5b7a9d9
+# https://medium.com/district-data-labs/a-practical-guide-to-anonymizing-datasets-with-python-faker-ecf15114c9be
 
 # Press Umschalt+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
@@ -6,7 +11,7 @@ from faker import Faker
 faker = Faker('de_DE')
 import csv
 import random
-# import re
+import re
 
 def firmen(anz, firmendatei, **kwrest):
     aunt = []
@@ -49,15 +54,28 @@ def kontakte(anz, kontaktdatei, **kwrest):
     else:
         test = kwrest.get('test')
 
+    nampart = [] # contains patterns to remove prename like elments like Prof.Dr., Frau, Herr, ...
+    nampart.append(r"(.*\w+\.)+\s") # search for title at beginning, indentifier: "."
+    nampart.append(r"Frau|Herr")  # search for "Frau" or "Herr" at beginning
+
     for nn in range(anz):
         if 'unt' not in kwrest:
             unt = faker.company()
         else:
             unt = kwrest.get('unt')
 
+        prename = [] # reset prename variable
         nam = faker.name()
-        namt = nam.split(' ', 1)
-        vnam, nnam = nam.split(' ', 1)
+        #namt = nam.split(' ', 1)
+
+        # remove prename elements
+        for pattern in nampart:
+            mat = re.match(pattern, nam)
+            if mat:
+                prename.append(mat.group())
+                nam = re.sub(pattern, "", nam)
+
+        vnam, nnam = nam.split(' ', 1) #split in first and last name. ToDo: handle double first name
         email = faker.ascii_company_email()
         add = faker.address()
         stra, plz_stadt = add.splitlines()
@@ -70,6 +88,9 @@ def kontakte(anz, kontaktdatei, **kwrest):
                 # dbwriter.writerow([nam] + [''] * 30 + ['2'] + ['0'])
                 dbwriter.writerow([''] + [''] + [unt] + [''] + [nnam] + [vnam] + [stra] + [plz] + [stadt] + [''] * 8 + [email] + [''] * 3)
         else:
+            print(f'name: {nam}')
+            print(f'mat: {mat}')
+            print(f'prename: {prename}')
             print(f'nname: {nnam}')
             print(f'vname: {vnam}')
             print(f'email: {email}')
@@ -116,7 +137,6 @@ def firmen_kontakte(anzf, anzk, firmendatei, kontaktdatei, **kwrest):
                 print(f'Firma: {unt}')
                 print('------------------')
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     schreib = False;
     GePartnerDatei='/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.csv'
@@ -126,4 +146,3 @@ if __name__ == '__main__':
     kontakte(5, GeKontaktDatei, test=True)
     # firmen_kontakte(40, 30, GePartnerDatei, GeKontaktDatei, test=False)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
