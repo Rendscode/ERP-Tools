@@ -8,10 +8,61 @@
 # Press Umschalt+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from faker import Faker
-faker = Faker('de_DE')
+faker = Faker('de_DE') #locale for local sounding Names, Companies, Addresses
 import csv
 import random
 import re
+
+
+class GeneratorBase:
+    def __init__(self, outputfiles, count, **kwrest):
+        testmode = kwrest.get('test', False) #in testmode, output is written to display instead of file
+        self.testmode = testmode
+        self.outputfiles = outputfiles
+        self.count = count
+
+    def split_address(self, address):
+        street, postcode_town = address.splitlines()
+        postcode, town = postcode_town.split(' ', 1)
+        return [street, postcode, town]
+
+
+class GenerateCompanyData(GeneratorBase):
+    def generate(self):
+        aunt = []
+        for nn in range(self.count):
+            company_name = faker.company()
+            company_address = faker.address()
+            address_parts = self.split_address(company_address)
+            status_customer = random.randint(0, 3)
+            status_supplier = random.randint(0, 1)
+            aunt.append([company_name, company_address])
+            self.output(company_name, address_parts, status_customer, status_supplier)
+        return aunt
+
+    def output(self, company_name, address_parts, status_customer, status_supplier):
+        if not self.testmode:
+            self.output_csv(company_name, address_parts, status_customer, status_supplier)
+        else:
+            self.output_test(company_name, address_parts, status_customer, status_supplier)
+
+    def output_csv(self, company_name, address_parts, status_customer, status_supplier):
+        with open(self.outputfiles, 'a+', newline='') as csvfile:
+            dbwriter = csv.writer(csvfile, delimiter=',',
+                                  quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            dbwriter.writerow([company_name] + [''] + [1] + ['"auto"'] * 2 + [''] * 2 + [address_parts[0]] +
+                              [address_parts[1]] + [address_parts[2]] +
+                              [''] * 21 + [status_customer] + [status_supplier] + [''] * 12)
+
+    @staticmethod
+    def output_test(company_name, address_parts, status_customer, status_supplier):
+        print(f'Firma: {company_name}')
+        # print(f'address: {add}')
+        print(f'Straße, Hausnummer: {address_parts[0]}')
+        # print(f'PLZ Ort: {postcode_town}')
+        print(f'PLZ: {address_parts[1]}')
+        print(f'Ort: {address_parts[2]}')
+        print('+++++++++++++++')
 
 def firmen(anz, firmendatei, **kwrest):
     aunt = []
@@ -103,12 +154,14 @@ def kontakte(anz, kontaktdatei, **kwrest):
             print('------------------')
 
 def firmen_kontakte(anzf, anzk, firmendatei, kontaktdatei, **kwrest):
-    if 'test' not in kwrest:
-        test = False
+    if 'ftest' not in kwrest:
+        ftest = False
     else:
-        test = kwrest.get('test')
+        ftest = kwrest.get('ftest')
 
-    aunt = firmen(anzf, firmendatei, ftest=test)
+    CG = GenerateCompanyData(firmendatei, anzf, test=ftest)
+    aunt = CG.generate()
+    #aunt = firmen(anzf, firmendatei, ftest=test)
     for nn in range(anzf):
         for mm in range(random.randint(1, anzk)):
             nam = faker.name()
@@ -119,7 +172,7 @@ def firmen_kontakte(anzf, anzk, firmendatei, kontaktdatei, **kwrest):
             stra, plz_stadt = add.splitlines()
             plz, stadt = plz_stadt.split(' ', 1)
 
-            if not test:
+            if not ftest:
                 with open(kontaktdatei, 'a+', newline='') as csvfile:
                     dbwriter = csv.writer(csvfile, delimiter=',',
                                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -143,6 +196,6 @@ if __name__ == '__main__':
     GeKontaktDatei = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.csv'
     # au = firmen(5, GePartnerDatei, test=True)
     # print(au)
-    kontakte(5, GeKontaktDatei, test=True)
-    # firmen_kontakte(40, 30, GePartnerDatei, GeKontaktDatei, test=False)
+    #kontakte(5, GeKontaktDatei, test=True)
+    firmen_kontakte(2, 3, GePartnerDatei, GeKontaktDatei, ftest=True)
 
