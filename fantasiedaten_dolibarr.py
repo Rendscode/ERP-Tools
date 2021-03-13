@@ -15,13 +15,9 @@ import re
 class GeneratorBase:
     def __init__(self, outputfile, count, **kwrest):
         testmode = kwrest.get('test', False) #in testmode, output is written to display instead of file
-        company = kwrest.get('company', '') #to enable person contacts belonging to a company
-        company_address = kwrest.get('company_address', '') #to enable person address equal to company address
         self.testmode = testmode
         self.outputfile = outputfile
         self.count = count
-        self.company = company
-        self.company_address = company_address
 
     def split_address(self, address):
         street, postcode_town = address.splitlines()
@@ -66,6 +62,13 @@ class GenerateCompanyData(GeneratorBase):
 
 
 class GeneratePersonData(GeneratorBase):
+    def __init__(self, outputfile, count, **kwrest):
+        super().__init__(outputfile, count, **kwrest)
+        company = kwrest.get('company', '') #to enable person contacts belonging to a company
+        company_address = kwrest.get('company_address', '') #to enable person address equal to company address
+        self.company = company
+        self.company_address = company_address
+
     def generate(self):
 
         nampart = []  # contains patterns to remove prename like elments like Prof.Dr., Frau, Herr, ...
@@ -153,7 +156,7 @@ if __name__ == '__main__':
     # au = firmen(5, GePartnerDatei, test=True)
     # print(au)
     #kontakte(5, GeKontaktDatei, test=True)
-    generate_persondata_and_companydata(2, 3, GePartnerDatei, GeKontaktDatei, test=False)
-    # PG = GeneratePersonData(GeKontaktDatei, 3, test=True)
-    # PG.generate()
+    #generate_persondata_and_companydata(2, 3, GePartnerDatei, GeKontaktDatei, test=False)
+    PG = GeneratePersonData(GeKontaktDatei, 3, test=True)
+    PG.generate()
 
