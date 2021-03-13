@@ -1,12 +1,10 @@
 # Generation of fake customer or supplier data (company name, address, employee data...)
-# purpose example: populate ERP datbase for tests
+# purpose example: populate ERP database for tests
 # helpful literature:
 # https://zetcode.com/python/faker/
 # https://towardsdatascience.com/how-to-create-fake-data-with-faker-a835e5b7a9d9
 # https://medium.com/district-data-labs/a-practical-guide-to-anonymizing-datasets-with-python-faker-ecf15114c9be
 
-# Press Umschalt+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from faker import Faker
 faker = Faker('de_DE') #locale for local sounding Names, Companies, Addresses
 import csv
@@ -70,7 +68,7 @@ class GeneratePersonData(GeneratorBase):
 
         nampart = []  # contains patterns to remove prename like elments like Prof.Dr., Frau, Herr, ...
         nampart.append(r"(.*\w+\.)+\s")  # search for title at beginning, indentifier: "." (detects Prof.Dr. ...)
-        nampart.append(r"Frau|Herr")  # search for "Frau" or "Herr" at beginning
+        nampart.append(r"Frau |Herr ")  # search for "Frau" or "Herr" at beginning
 
         for nn in range(self.count):
             if self.company == '':  # if company name is empty, a company name is being created, but no other company data
@@ -80,6 +78,7 @@ class GeneratePersonData(GeneratorBase):
 
             prename = []  # reset prename variable
             person_name = faker.name()
+            #print(f'raw Person Name: {person_name}')
 
             # remove prename elements
             for pattern in nampart:
@@ -125,61 +124,6 @@ class GeneratePersonData(GeneratorBase):
         print('------------------')
 
 
-def kontakte(anz, kontaktdatei, **kwrest):
-    # firmendatei = rest[1]
-    if 'test' not in kwrest:
-        test = False
-    else:
-        test = kwrest.get('test')
-
-    nampart = [] # contains patterns to remove prename like elments like Prof.Dr., Frau, Herr, ...
-    nampart.append(r"(.*\w+\.)+\s") # search for title at beginning, indentifier: "."
-    nampart.append(r"Frau|Herr")  # search for "Frau" or "Herr" at beginning
-
-    for nn in range(anz):
-        if 'unt' not in kwrest:
-            unt = faker.company()
-        else:
-            unt = kwrest.get('unt')
-
-        prename = [] # reset prename variable
-        nam = faker.name()
-        #namt = nam.split(' ', 1)
-
-        # remove prename elements
-        for pattern in nampart:
-            mat = re.match(pattern, nam)
-            if mat:
-                prename.append(mat.group())
-                nam = re.sub(pattern, "", nam)
-
-        vnam, nnam = nam.split(' ', 1) #split in first and last name. ToDo: handle double first name
-        email = faker.ascii_company_email()
-        add = faker.address()
-        stra, plz_stadt = add.splitlines()
-        plz, stadt = plz_stadt.split(' ', 1)
-
-        if not test:
-            with open(kontaktdatei, 'a+', newline='') as csvfile:
-                dbwriter = csv.writer(csvfile, delimiter=',',
-                                        quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                # dbwriter.writerow([nam] + [''] * 30 + ['2'] + ['0'])
-                dbwriter.writerow([''] + [''] + [unt] + [''] + [nnam] + [vnam] + [stra] + [plz] + [stadt] + [''] * 8 + [email] + [''] * 3)
-        else:
-            print(f'name: {nam}')
-            print(f'mat: {mat}')
-            print(f'prename: {prename}')
-            print(f'nname: {nnam}')
-            print(f'vname: {vnam}')
-            print(f'email: {email}')
-            print(f'address: {add}')
-            print(f'Straße, Hausnummer: {stra}')
-            print(f'PLZ Ort: {plz_stadt}')
-            print(f'PLZ: {plz}')
-            print(f'Ort: {stadt}')
-            print(f'Firma: {unt}')
-            print('------------------')
-
 def firmen_kontakte(anzf, anzk, firmendatei, kontaktdatei, **kwrest):
     if 'ftest' not in kwrest:
         ftest = False
@@ -219,14 +163,14 @@ def firmen_kontakte(anzf, anzk, firmendatei, kontaktdatei, **kwrest):
 
 if __name__ == '__main__':
     schreib = False;
-    # GePartnerDatei='/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.csv'
-    # GeKontaktDatei = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.csv'
+    # GePartnerDatei='~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.csv'
+    # GeKontaktDatei = '~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.csv'
     GePartnerDatei='Beispiel_Import_Datei_societe_1.csv'
     GeKontaktDatei = 'Beispiel_Import_Datei_societe_2.csv'
     # au = firmen(5, GePartnerDatei, test=True)
     # print(au)
     #kontakte(5, GeKontaktDatei, test=True)
     # firmen_kontakte(2, 3, GePartnerDatei, GeKontaktDatei, ftest=False)
-    PG = GeneratePersonData(GeKontaktDatei, 3, test=False)
+    PG = GeneratePersonData(GeKontaktDatei, 3, test=True)
     PG.generate()
 
