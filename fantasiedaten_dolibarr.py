@@ -28,16 +28,16 @@ class GeneratorBase:
 
 class GenerateCompanyData(GeneratorBase):
     def generate(self):
-        aunt = []
+        company_name_and_address = []
         for nn in range(self.count):
             company_name = faker.company()
             company_address = faker.address()
             address_parts = self.split_address(company_address)
             status_customer = random.randint(0, 3)
             status_supplier = random.randint(0, 1)
-            aunt.append([company_name, company_address])
+            company_name_and_address.append([company_name, company_address])
             self.output(company_name, address_parts, status_customer, status_supplier)
-        return aunt
+        return company_name_and_address
 
     def output(self, company_name, address_parts, status_customer, status_supplier):
         if not self.testmode:
