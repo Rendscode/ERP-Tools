@@ -5,11 +5,11 @@
 # https://towardsdatascience.com/how-to-create-fake-data-with-faker-a835e5b7a9d9
 # https://medium.com/district-data-labs/a-practical-guide-to-anonymizing-datasets-with-python-faker-ecf15114c9be
 
-from faker import Faker
-faker = Faker('de_DE') #locale for local sounding Names, Companies, Addresses
 import csv
 import random
 import re
+from faker import Faker
+faker = Faker('de_DE') #locale for local sounding Names, Companies, Addresses
 
 
 class GeneratorBase:
@@ -19,7 +19,8 @@ class GeneratorBase:
         self.outputfile = outputfile
         self.count = count
 
-    def split_address(self, address):
+    @staticmethod
+    def split_address(address):
         street, postcode_town = address.splitlines()
         postcode, town = postcode_town.split(' ', 1)
         return [street, postcode, town]
@@ -77,14 +78,14 @@ class GeneratePersonData(GeneratorBase):
 
         for nn in range(self.count):
 
-            if self.company == '':  # if company name is empty, a company name is being created, but no other company data
+            if self.company == '':  # if company name is empty, a name is being created, but no other company data
                 company_name = faker.company()
             else:
                 company_name = self.company
 
             prename = []  # reset prename variable
             person_name = faker.name()
-            #print(f'raw Person Name: {person_name}')
+            # print(f'raw Person Name: {person_name}')
 
             # remove prename elements
             for pattern in nampart:
