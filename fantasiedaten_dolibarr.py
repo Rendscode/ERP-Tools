@@ -16,10 +16,12 @@ class GeneratorBase:
     def __init__(self, outputfile, count, **kwrest):
         testmode = kwrest.get('test', False) #in testmode, output is written to display instead of file
         company = kwrest.get('company', '') #to enable person contacts belonging to a company
+        company_address = kwrest.get('company_address', '') #to enable person address equal to company address
         self.testmode = testmode
         self.outputfile = outputfile
         self.count = count
         self.company = company
+        self.company_address = company_address
 
     def split_address(self, address):
         street, postcode_town = address.splitlines()
@@ -71,6 +73,7 @@ class GeneratePersonData(GeneratorBase):
         nampart.append(r"Frau |Herr ")  # search for "Frau" or "Herr" at beginning
 
         for nn in range(self.count):
+
             if self.company == '':  # if company name is empty, a company name is being created, but no other company data
                 company_name = faker.company()
             else:
@@ -89,7 +92,12 @@ class GeneratePersonData(GeneratorBase):
 
             first_name, last_name = person_name.split(' ', 1)  # split in first and last name. ToDo: handle double first name
             email = faker.ascii_company_email()
-            person_address = faker.address()
+
+            if self.company_address == '':  # if company_address is empty, a company address is being created
+                person_address = faker.address()
+            else:
+                person_address = self.company_address
+
             address_parts = self.split_address(person_address)
             self.output(company_name, first_name, last_name, address_parts, email)
 
@@ -124,45 +132,20 @@ class GeneratePersonData(GeneratorBase):
         print('------------------')
 
 
-def firmen_kontakte(anzf, anzk, firmendatei, kontaktdatei, **kwrest):
-    if 'ftest' not in kwrest:
-        ftest = False
-    else:
-        ftest = kwrest.get('ftest')
+def generate_persondata_and_companydata(count_company, count_person, outputfile_company, outputfile_person, **kwrest):
+    test = kwrest.get('test', False)  # in testmode, output is written to display instead of file
 
-    CG = GenerateCompanyData(firmendatei, anzf, test=ftest)
-    aunt = CG.generate()
-    #aunt = firmen(anzf, firmendatei, ftest=test)
-    for nn in range(anzf):
-        for mm in range(random.randint(1, anzk)):
-            nam = faker.name()
-            vnam, nnam = nam.split(' ', 1)
-            email = faker.ascii_company_email()
-            unt = aunt[nn][0]
-            add = aunt[nn][1]
-            stra, plz_stadt = add.splitlines()
-            plz, stadt = plz_stadt.split(' ', 1)
+    CG = GenerateCompanyData(outputfile_company, count_company, test=test)
+    company_name_and_address = CG.generate()
 
-            if not ftest:
-                with open(kontaktdatei, 'a+', newline='') as csvfile:
-                    dbwriter = csv.writer(csvfile, delimiter=',',
-                                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    # dbwriter.writerow([nam] + [''] * 30 + ['2'] + ['0'])
-                    dbwriter.writerow([''] + [''] + [unt] + [''] + [nnam] + [vnam] + [stra] + [plz] + [stadt] + [''] * 8 + [email] + [''] * 3)
-            else:
-                print(f'nname: {nnam}')
-                print(f'vname: {vnam}')
-                print(f'email: {email}')
-                # print(f'address: {add}')
-                print(f'Straße, Hausnummer: {stra}')
-                # print(f'PLZ Ort: {plz_stadt}')
-                print(f'PLZ: {plz}')
-                print(f'Ort: {stadt}')
-                print(f'Firma: {unt}')
-                print('------------------')
+    for nn in range(count_company):
+        for mm in range(random.randint(1, count_person)):
+            PG = GeneratePersonData(outputfile_person, 1, company=company_name_and_address[nn][0],
+                                    company_address=company_name_and_address[nn][1], test=test)
+            PG.generate()
+
 
 if __name__ == '__main__':
-    schreib = False;
     # GePartnerDatei='~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.csv'
     # GeKontaktDatei = '~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.csv'
     GePartnerDatei='Beispiel_Import_Datei_societe_1.csv'
@@ -170,7 +153,7 @@ if __name__ == '__main__':
     # au = firmen(5, GePartnerDatei, test=True)
     # print(au)
     #kontakte(5, GeKontaktDatei, test=True)
-    # firmen_kontakte(2, 3, GePartnerDatei, GeKontaktDatei, ftest=False)
-    PG = GeneratePersonData(GeKontaktDatei, 3, test=True)
-    PG.generate()
+    generate_persondata_and_companydata(2, 3, GePartnerDatei, GeKontaktDatei, test=False)
+    # PG = GeneratePersonData(GeKontaktDatei, 3, test=True)
+    # PG.generate()
 
