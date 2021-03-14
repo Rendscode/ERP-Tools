@@ -9,12 +9,12 @@ import csv
 import random
 import re
 from faker import Faker
-faker = Faker('de_DE') #locale for local sounding Names, Companies, Addresses
+faker = Faker('de_DE')  # locale for local sounding Names, Companies, Addresses
 
 
 class GeneratorBase:
     def __init__(self, outputfile, count, **kwrest):
-        testmode = kwrest.get('test', False) #in testmode, output is written to display instead of file
+        testmode = kwrest.get('test', False)  # in testmode, output is written to display instead of file
         self.testmode = testmode
         self.outputfile = outputfile
         self.count = count
