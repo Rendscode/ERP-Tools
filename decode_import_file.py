@@ -2,6 +2,8 @@
 # the respective order
 # the data_of_interest dictionary contains the relation between unique identifiers in Dolibarr and the name convention
 # of this module
+# the unique identifiers are contained in the headline of the import file template, which can be output from Dolibarr's
+# import module
 
 import csv
 import re
@@ -20,7 +22,7 @@ def read_structure(template_file, data_of_interest):
                     position[index] = (data_of_interest_value)
                 index += 1
 
-        print(position)
+    return position
 
 if __name__ == '__main__':
     GePartnerDatei = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.orig.V12.csv'
@@ -29,4 +31,4 @@ if __name__ == '__main__':
                's.status': '1', 's.code_client': 'auto', 's.code_fournisseur': 'auto', 's.address': 'address_parts[0]',
                's.zip': 'address_parts[1]', 's.town': 'address_parts[2]'}
 
-    read_structure(GePartnerDatei, mapping)
+    print(read_structure(GePartnerDatei, mapping))
