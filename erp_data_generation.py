@@ -18,6 +18,7 @@ class GeneratorBase:
         testmode = kwrest.get('test', False)  # in testmode, output is written to display instead of file
         self.testmode = testmode
         self.outputfile = outputfile
+#        outputfile_structure = kwrest.get('outputfile_structure', '')
         self.outputfile_structure = outputfile_structure
         self.count = count
 
@@ -29,8 +30,10 @@ class GeneratorBase:
 
     # replace dummy entries in output file (like 'company_name') with actual data
     def replace_strings_variables(self, variable_dict):
+        outputfile_structure = self.outputfile_structure
         for key, value in variable_dict.items():
-            self.outputfile_structure = re.sub(key, value, str(self.outputfile_structure))
+            outputfile_structure = re.sub(key, value, str(outputfile_structure))
+        return outputfile_structure
 
 
 class GenerateCompanyData(GeneratorBase):
@@ -56,11 +59,11 @@ class GenerateCompanyData(GeneratorBase):
         company_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
                         'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
                         'status_customer': str(status_customer), 'status_supplier': str(status_supplier)}
+        row_output = self.replace_strings_variables(company_dict)  # replace strings in document raw structure with created oontent
         with open(self.outputfile, 'a+', newline='') as csvfile:
             dbwriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            self.replace_strings_variables(company_dict)  # replace strings in document raw structure with created oontent
-            dbwriter.writerow(eval(self.outputfile_structure))
+            dbwriter.writerow(eval(row_output))
 
     @staticmethod
     def output_test(company_name, address_parts, status_customer, status_supplier):
@@ -124,11 +127,11 @@ class GeneratePersonData(GeneratorBase):
         person_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
                         'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
                         'first_name': first_name, 'last_name': last_name, 'email': email}
-        self.replace_strings_variables(person_dict)
+        row_output = self.replace_strings_variables(person_dict)
         with open(self.outputfile, 'a+', newline='') as csvfile:
             dbwriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            dbwriter.writerow(eval(self.outputfile_structure))
+            dbwriter.writerow(eval(row_output))
 
     @staticmethod
     def output_test(company_name, first_name, last_name, address_parts, email):
@@ -147,15 +150,16 @@ class GeneratePersonData(GeneratorBase):
         print('------------------')
 
 
-def generate_persondata_and_companydata(count_company, count_person, outputfile_company, outputfile_person, **kwrest):
+def generate_persondata_and_companydata(count_company, count_person, outputfile_company, outputfile_person,
+                                        data_structure, **kwrest):
     test = kwrest.get('test', False)  # in testmode, output is written to display instead of file
 
-    CG = GenerateCompanyData(outputfile_company, count_company, test=test)
+    CG = GenerateCompanyData(outputfile_company, data_structure[0], count_company, test=test)
     company_name_and_address = CG.generate()
 
     for nn in range(count_company):
         for mm in range(random.randint(1, count_person)):
-            PG = GeneratePersonData(outputfile_person, 1, company=company_name_and_address[nn][0],
+            PG = GeneratePersonData(outputfile_person, data_structure[1], 1, company=company_name_and_address[nn][0],
                                     company_address=company_name_and_address[nn][1], test=test)
             PG.generate()
 
@@ -167,17 +171,20 @@ if __name__ == '__main__':
     # GeKontaktDatei = '~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.csv'
     GePartnerDatei='Beispiel_Import_Datei_societe_1.csv'
     GeKontaktDatei = 'Beispiel_Import_Datei_societe_2.csv'
-    #generate_persondata_and_companydata(2, 3, GePartnerDatei, GeKontaktDatei, test=False)
-    # mapping = {'s.nom': 'company_name', 's.client': 'status_customer', 's.fournisseur': 'status_supplier',
-    #            's.status': '1', 's.code_client': 'auto', 's.code_fournisseur': 'auto', 's.address': 'address_parts[0]',
-    #            's.zip': 'address_parts[1]', 's.town': 'address_parts[2]'}
-    mapping = {'s.fk_soc': 'company_name', 's.firstname': 'first_name', 's.lastname': 'last_name',
+
+    mapping1 = {'s.nom': 'company_name', 's.client': 'status_customer', 's.fournisseur': 'status_supplier',
+               's.status': '1', 's.code_client': 'auto', 's.code_fournisseur': 'auto', 's.address': 'address_parts[0]',
+               's.zip': 'address_parts[1]', 's.town': 'address_parts[2]'}
+    mapping2 = {'s.fk_soc': 'company_name', 's.firstname': 'first_name', 's.lastname': 'last_name',
                's.address': 'address_parts[0]', 's.zip': 'address_parts[1]', 's.town': 'address_parts[2]',
                's.email': 'email'}
-    data_structure = read_structure(GeKontaktDatei_Template, mapping)
-    PG = GeneratePersonData(GeKontaktDatei, data_structure, 3)
-    PG.generate()
-    # data_structure = read_structure(GePartnerDatei_Template, mapping)
-    # CG = GenerateCompanyData(GePartnerDatei, data_structure, 3)
+
+    data_structure = []
+    data_structure.append(read_structure(GePartnerDatei_Template, mapping1))
+    # PG = GeneratePersonData(GeKontaktDatei, data_structure, 3)
+    # PG.generate()
+    data_structure.append(read_structure(GeKontaktDatei_Template, mapping2))
+    # CG = GenerateCompanyData(GePartnerDatei, data_structure[0], 3)
     # CG.generate()
+    generate_persondata_and_companydata(2, 3, GePartnerDatei, GeKontaktDatei, data_structure, test=False)
 
