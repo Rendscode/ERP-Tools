@@ -8,6 +8,7 @@
 import csv
 import re
 
+
 def read_structure(template_file, data_of_interest):
     with open(template_file, newline='') as csvfile:
         content = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -25,10 +26,10 @@ def read_structure(template_file, data_of_interest):
     return position
 
 if __name__ == '__main__':
-    GePartnerDatei = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.orig.V12.csv'
+    GePartnerDatei_Template = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.orig.V12.csv'
 
-    mapping = {'s.nom': 'company_name', 's.client': 'status_customer', 's.fournisseur': 'status_supplier',
+    mapping = {'s.nom': '*company_name', 's.client': 'status_customer', 's.fournisseur': 'status_supplier',
                's.status': '1', 's.code_client': 'auto', 's.code_fournisseur': 'auto', 's.address': 'address_parts[0]',
                's.zip': 'address_parts[1]', 's.town': 'address_parts[2]'}
 
-    print(read_structure(GePartnerDatei, mapping))
+    print(read_structure(GePartnerDatei_Template, mapping))

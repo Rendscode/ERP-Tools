@@ -8,15 +8,17 @@
 import csv
 import random
 import re
+from decode_import_file import read_structure
 from faker import Faker
 faker = Faker('de_DE')  # locale for local sounding Names, Companies, Addresses
 
 
 class GeneratorBase:
-    def __init__(self, outputfile, count, **kwrest):
+    def __init__(self, outputfile, outputfile_structure, count, **kwrest):
         testmode = kwrest.get('test', False)  # in testmode, output is written to display instead of file
         self.testmode = testmode
         self.outputfile = outputfile
+        self.outputfile_structure = outputfile_structure
         self.count = count
 
     @staticmethod
@@ -24,6 +26,12 @@ class GeneratorBase:
         street, postcode_town = address.splitlines()
         postcode, town = postcode_town.split(' ', 1)
         return [street, postcode, town]
+
+    # replace dummy entries in outputfile (like 'company_name') with actual data
+    def replace_strings_variables(self, variable_dict):
+        for key, value in variable_dict.items():
+            self.outputfile_structure = re.sub(key, value, str(self.outputfile_structure))
+
 
 
 class GenerateCompanyData(GeneratorBase):
@@ -46,12 +54,14 @@ class GenerateCompanyData(GeneratorBase):
             self.output_test(company_name, address_parts, status_customer, status_supplier)
 
     def output_csv(self, company_name, address_parts, status_customer, status_supplier):
+        company_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
+                        'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
+                        'status_customer': str(status_customer), 'status_supplier': str(status_supplier)}
         with open(self.outputfile, 'a+', newline='') as csvfile:
             dbwriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            dbwriter.writerow([company_name] + [''] + [1] + ['"auto"'] * 2 + [''] * 2 + [address_parts[0]] +
-                              [address_parts[1]] + [address_parts[2]] +
-                              [''] * 21 + [status_customer] + [status_supplier] + [''] * 12)
+            self.replace_strings_variables(company_dict)  # replace strings in document raw structure with created oontent
+            dbwriter.writerow(eval(str(self.outputfile_structure)))
 
     @staticmethod
     def output_test(company_name, address_parts, status_customer, status_supplier):
@@ -63,8 +73,8 @@ class GenerateCompanyData(GeneratorBase):
 
 
 class GeneratePersonData(GeneratorBase):
-    def __init__(self, outputfile, count, **kwrest):
-        super().__init__(outputfile, count, **kwrest)
+    def __init__(self, outputfile, outputfile_structure, count, **kwrest):
+        super().__init__(outputfile, outputfile_structure, count, **kwrest)
         company = kwrest.get('company', '') #to enable person contacts belonging to a company
         company_address = kwrest.get('company_address', '') #to enable person address equal to company address
         self.company = company
@@ -112,6 +122,9 @@ class GeneratePersonData(GeneratorBase):
             self.output_test(company_name, first_name, last_name, address_parts, email)
 
     def output_csv(self, company_name, first_name, last_name, address_parts, email):
+        company_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
+                        'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
+                        'email': email}
         with open(self.outputfile, 'a+', newline='') as csvfile:
             dbwriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -150,14 +163,18 @@ def generate_persondata_and_companydata(count_company, count_person, outputfile_
 
 
 if __name__ == '__main__':
+    GePartnerDatei_Template = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.orig.V12.csv'
     # GePartnerDatei='~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.csv'
     # GeKontaktDatei = '~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.csv'
     GePartnerDatei='Beispiel_Import_Datei_societe_1.csv'
     GeKontaktDatei = 'Beispiel_Import_Datei_societe_2.csv'
-    # au = firmen(5, GePartnerDatei, test=True)
-    # print(au)
-    #kontakte(5, GeKontaktDatei, test=True)
     #generate_persondata_and_companydata(2, 3, GePartnerDatei, GeKontaktDatei, test=False)
-    PG = GeneratePersonData(GeKontaktDatei, 3, test=True)
+    mapping = {'s.nom': 'company_name', 's.client': 'status_customer', 's.fournisseur': 'status_supplier',
+               's.status': '1', 's.code_client': 'auto', 's.code_fournisseur': 'auto', 's.address': 'address_parts[0]',
+               's.zip': 'address_parts[1]', 's.town': 'address_parts[2]'}
+    PG = GeneratePersonData(GeKontaktDatei, '', 3)
     PG.generate()
+    # data_structure = read_structure(GePartnerDatei_Template, mapping)
+    # CG = GenerateCompanyData(GePartnerDatei, data_structure, 3)
+    # CG.generate()
 
