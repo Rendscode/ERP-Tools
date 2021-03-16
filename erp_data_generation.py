@@ -27,11 +27,10 @@ class GeneratorBase:
         postcode, town = postcode_town.split(' ', 1)
         return [street, postcode, town]
 
-    # replace dummy entries in outputfile (like 'company_name') with actual data
+    # replace dummy entries in output file (like 'company_name') with actual data
     def replace_strings_variables(self, variable_dict):
         for key, value in variable_dict.items():
             self.outputfile_structure = re.sub(key, value, str(self.outputfile_structure))
-
 
 
 class GenerateCompanyData(GeneratorBase):
@@ -61,7 +60,7 @@ class GenerateCompanyData(GeneratorBase):
             dbwriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
             self.replace_strings_variables(company_dict)  # replace strings in document raw structure with created oontent
-            dbwriter.writerow(eval(str(self.outputfile_structure)))
+            dbwriter.writerow(eval(self.outputfile_structure))
 
     @staticmethod
     def output_test(company_name, address_parts, status_customer, status_supplier):
@@ -122,15 +121,14 @@ class GeneratePersonData(GeneratorBase):
             self.output_test(company_name, first_name, last_name, address_parts, email)
 
     def output_csv(self, company_name, first_name, last_name, address_parts, email):
-        company_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
+        person_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
                         'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
-                        'email': email}
+                        'first_name': first_name, 'last_name': last_name, 'email': email}
+        self.replace_strings_variables(person_dict)
         with open(self.outputfile, 'a+', newline='') as csvfile:
             dbwriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            dbwriter.writerow(
-                [''] + [''] + [company_name] + [''] + [last_name] + [first_name] + [address_parts[0]] +
-                      [address_parts[1]] + [address_parts[2]] + [''] * 8 + [email] + [''] * 3)
+            dbwriter.writerow(eval(self.outputfile_structure))
 
     @staticmethod
     def output_test(company_name, first_name, last_name, address_parts, email):
@@ -164,15 +162,20 @@ def generate_persondata_and_companydata(count_company, count_person, outputfile_
 
 if __name__ == '__main__':
     GePartnerDatei_Template = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.orig.V12.csv'
+    GeKontaktDatei_Template = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.orig.V12.csv'
     # GePartnerDatei='~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.csv'
     # GeKontaktDatei = '~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.csv'
     GePartnerDatei='Beispiel_Import_Datei_societe_1.csv'
     GeKontaktDatei = 'Beispiel_Import_Datei_societe_2.csv'
     #generate_persondata_and_companydata(2, 3, GePartnerDatei, GeKontaktDatei, test=False)
-    mapping = {'s.nom': 'company_name', 's.client': 'status_customer', 's.fournisseur': 'status_supplier',
-               's.status': '1', 's.code_client': 'auto', 's.code_fournisseur': 'auto', 's.address': 'address_parts[0]',
-               's.zip': 'address_parts[1]', 's.town': 'address_parts[2]'}
-    PG = GeneratePersonData(GeKontaktDatei, '', 3)
+    # mapping = {'s.nom': 'company_name', 's.client': 'status_customer', 's.fournisseur': 'status_supplier',
+    #            's.status': '1', 's.code_client': 'auto', 's.code_fournisseur': 'auto', 's.address': 'address_parts[0]',
+    #            's.zip': 'address_parts[1]', 's.town': 'address_parts[2]'}
+    mapping = {'s.fk_soc': 'company_name', 's.firstname': 'first_name', 's.lastname': 'last_name',
+               's.address': 'address_parts[0]', 's.zip': 'address_parts[1]', 's.town': 'address_parts[2]',
+               's.email': 'email'}
+    data_structure = read_structure(GeKontaktDatei_Template, mapping)
+    PG = GeneratePersonData(GeKontaktDatei, data_structure, 3)
     PG.generate()
     # data_structure = read_structure(GePartnerDatei_Template, mapping)
     # CG = GenerateCompanyData(GePartnerDatei, data_structure, 3)
