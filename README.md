@@ -15,7 +15,7 @@ To have realistic looking data, the faker module is used. Faker can be customize
 
 ### Output to file - import file format of Dolibarr
 Dolibarr can input data via .csv files. In Dolibarr it's possible to trigger the output of a template file. The structure of the file (entries and order of the entries in columns) can change from version to version. To easily obtain the structure use the **read_structure** function.
-```{r eval=FALSE} data_structure = read_structure(TemplateFileName, dictionary_with_mapping) ```
+```data_structure = read_structure(TemplateFileName, dictionary_with_mapping) ```
 
 ### Generate company data
 
