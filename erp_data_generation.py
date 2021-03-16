@@ -86,6 +86,7 @@ class GeneratePersonData(GeneratorBase):
 
         nampart = []  # contains patterns to remove prename like elments like Prof.Dr., Frau, Herr, ...
         nampart.append(r"(.*\w+\.)+\s")  # search for title at beginning, indentifier: "." (detects Prof.Dr. ...)
+        #nampart.append(r"(^[Prof|Dr]+\.)+\s")  # search for title at beginning, indentifier: "." (detects Prof.Dr. ...)
         nampart.append(r"Frau |Herr ")  # search for "Frau" or "Herr" at beginning
 
         for nn in range(self.count):
@@ -106,7 +107,13 @@ class GeneratePersonData(GeneratorBase):
                     prename.append(mat.group())
                     person_name = re.sub(pattern, "", person_name)
 
-            first_name, last_name = person_name.split(' ', 1)  # split in first and last name. ToDo: handle double first name
+            try:  # it occurs that remaining name consists only of one word, so split function will raise ValueError
+                first_name, last_name = person_name.split(' ', 1)  # split in first and last name. ToDo: handle double first name
+            except(ValueError):
+                print(f'Value Error - person name before split: "{person_name}", prename: "{prename}"')
+                last_name = person_name
+                first_name = ''
+
             email = faker.ascii_company_email()
 
             if self.company_address == '':  # if company_address is empty, a company address is being created
@@ -165,8 +172,8 @@ def generate_persondata_and_companydata(count_company, count_person, outputfile_
 
 
 if __name__ == '__main__':
-    GePartnerDatei_Template = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.orig.V12.csv'
-    GeKontaktDatei_Template = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.orig.V12.csv'
+    GePartnerDatei_Template = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.orig.V13.csv'
+    GeKontaktDatei_Template = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.orig.V13.csv'
     # GePartnerDatei='~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.csv'
     # GeKontaktDatei = '~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.csv'
     GePartnerDatei='Beispiel_Import_Datei_societe_1.csv'
@@ -186,5 +193,5 @@ if __name__ == '__main__':
     data_structure.append(read_structure(GeKontaktDatei_Template, mapping2))
     # CG = GenerateCompanyData(GePartnerDatei, data_structure[0], 3)
     # CG.generate()
-    generate_persondata_and_companydata(2, 3, GePartnerDatei, GeKontaktDatei, data_structure, test=False)
+    generate_persondata_and_companydata(50, 20, GePartnerDatei, GeKontaktDatei, data_structure, test=True)
 
