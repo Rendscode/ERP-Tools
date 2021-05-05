@@ -14,11 +14,14 @@ In order to demonstrate the capabilities of Dolibarr to prospects it's helpful t
 To have realistic looking data, the faker module is used. Faker can be customized to output data in country specific format and content: company and person names, civility of persons, address format, regional city names. To localize to your needs change the faker locale.
 
 ### Output to file - import file format of Dolibarr
-Dolibarr can input data via .csv files. In Dolibarr it's possible to trigger the output of a template file. The structure of the file (entries and order of the entries in columns) can change from version to version. To easily obtain the structure use the **read_structure** function.
+Dolibarr can input data via .csv files. From Dolibarr it's possible to output a template file. The structure of the file (entries and order of the entries in columns) can change from version to version. To easily obtain the structure use the **read_structure** function.
 ```data_structure = read_structure(TemplateFileName, dictionary_with_mapping) ```
 
 ### Generate company data
-
+1) create CompanyData object
+2) call generate method
+    CG = GenerateCompanyData(outputfile_company, data_structure[0], count_company, test=test)
+    company_name_and_address = CG.generate()
 
 
 ## ToDos:
