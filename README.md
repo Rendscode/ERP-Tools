@@ -20,8 +20,9 @@ Dolibarr can input data via .csv files. From Dolibarr it's possible to output a 
 ### Generate company data
 1) create CompanyData object
 2) call generate method
-    CG = GenerateCompanyData(outputfile_company, data_structure[0], count_company, test=test)
-    company_name_and_address = CG.generate()
+
+```CG = GenerateCompanyData(outputfile_company, data_structure[0], count_company, test=test)```
+```company_name_and_address = CG.generate()```
 
 
 ## ToDos:
