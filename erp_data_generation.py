@@ -41,19 +41,12 @@ class GenerateCompanyData(GeneratorBase):
 
     def output(self, company_name, address_parts, status_customer, status_supplier):
         if not self.testmode:
-            self.output_csv(company_name, address_parts, status_customer, status_supplier)
+            company_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
+                            'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
+                            'status_customer': str(status_customer), 'status_supplier': str(status_supplier)}
+            self.output_csv(company_dict)
         else:
             self.output_test(company_name, address_parts, status_customer, status_supplier)
-
-    def output_csv(self, company_name, address_parts, status_customer, status_supplier):
-        company_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
-                        'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
-                        'status_customer': str(status_customer), 'status_supplier': str(status_supplier)}
-        row_output = self.replace_strings_variables(company_dict)  # replace strings in document raw structure with created oontent
-        with open(self.outputfile, 'a+', newline='') as csvfile:
-            dbwriter = csv.writer(csvfile, delimiter=',',
-                                  quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            dbwriter.writerow(eval(row_output))
 
     @staticmethod
     def output_test(company_name, address_parts, status_customer, status_supplier):
@@ -116,19 +109,12 @@ class GeneratePersonData(GeneratorBase):
 
     def output(self, company_name, first_name, last_name, address_parts, email):
         if not self.testmode:
-            self.output_csv(company_name, first_name, last_name, address_parts, email)
+            person_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
+                           'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
+                           'first_name': first_name, 'last_name': last_name, 'email': email}
+            self.output_csv(person_dict)
         else:
             self.output_test(company_name, first_name, last_name, address_parts, email)
-
-    def output_csv(self, company_name, first_name, last_name, address_parts, email):
-        person_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
-                        'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
-                        'first_name': first_name, 'last_name': last_name, 'email': email}
-        row_output = self.replace_strings_variables(person_dict)
-        with open(self.outputfile, 'a+', newline='') as csvfile:
-            dbwriter = csv.writer(csvfile, delimiter=',',
-                                  quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            dbwriter.writerow(eval(row_output))
 
     @staticmethod
     def output_test(company_name, first_name, last_name, address_parts, email):
