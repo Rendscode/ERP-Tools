@@ -8,7 +8,6 @@ class CreateFile:
         testmode = kwrest.get('test', False)  # in testmode, output is written to display instead of file
         self.testmode = testmode
         self.outputfile = outputfile
-        #        outputfile_structure = kwrest.get('outputfile_structure', '')
         self.outputfile_structure = outputfile_structure
 
     # replace dummy entries in output file (like 'company_name') with actual data
@@ -19,22 +18,8 @@ class CreateFile:
         return outputfile_structure
 
     def output_csv(self, output_dict):
-        # company_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
-        #                 'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
-        #                 'status_customer': str(status_customer), 'status_supplier': str(status_supplier)}
         row_output = self.replace_strings_variables(output_dict)  # replace strings in document raw structure with created oontent
         with open(self.outputfile, 'a+', newline='') as csvfile:
             dbwriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
             dbwriter.writerow(eval(row_output))
-
-    # def output_csv(self, company_name, address_parts, status_customer, status_supplier):
-    #     company_dict = {'company_name': company_name, 'address_parts\[0\]': address_parts[0],
-    #                     'address_parts\[1\]': address_parts[1], 'address_parts\[2\]': address_parts[2],
-    #                     'status_customer': str(status_customer), 'status_supplier': str(status_supplier)}
-    #     row_output = self.replace_strings_variables(
-    #         company_dict)  # replace strings in document raw structure with created oontent
-    #     with open(self.outputfile, 'a+', newline='') as csvfile:
-    #         dbwriter = csv.writer(csvfile, delimiter=',',
-    #                               quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    #         dbwriter.writerow(eval(row_output))

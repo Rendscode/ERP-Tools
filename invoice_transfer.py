@@ -2,23 +2,30 @@
 # via Dolibarr's spreadsheet import functionality
 
 from decode_import_file import read_structure  # function to determine data order in spreadsheet
-import csv
+# import csv
 import re
+import pandas as pd
 from erp_basic_tools import CreateFile
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Strg+F8 to toggle the breakpoint.
+class TransferSupplierInvoices(CreateFile):
+    def __init__(self, input_data, outputfile_invoice, outputfile_structure_invoice, outputfile_invoice_items, outputfile_structure_invoice_items, **kwrest):
+        testmode = kwrest.get('test', False)  # in testmode, output is written to display instead of file
+        self.testmode = testmode
+        self.input_data = input_data
+        self.outputfile_invoice = outputfile_invoice
+        self.outputfile_structure_invoice = outputfile_structure_invoice
+        self.outputfile_invoice_items = outputfile_invoice_items
+        self.outputfile_structure_invoice_items = outputfile_structure_invoice_items
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    data_from_libreoffice = '/home/hhhans/Lokal/Dolibarr/Datenmigration KalkulationWattwurm/Export aus KalkulationWattwurmDB.csv'
     supplier_invoice_template = '/home/hhhans/Lokal/Dolibarr/Datenmigration KalkulationWattwurm/Beispiel_Import_Datei_fournisseur_1.V14.csv'
     supplier_invoice_items_template = '/home/hhhans/Lokal/Dolibarr/Datenmigration KalkulationWattwurm/Beispiel_Import_Datei_fournisseur_2.V14.csv'
-    # GePartnerDatei='~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.csv'
-    # GeKontaktDatei = '~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.csv'
-    GePartnerDatei = 'Beispiel_Import_Datei_societe_1.csv'
-    GeKontaktDatei = 'Beispiel_Import_Datei_societe_2.csv'
+
+    output_file_supplier_invoice = 'Import_Datei_fournisseur_1.V14.csv'
+    output_file_supplier_invoice_items = 'Import_Datei_fournisseur_2.V14.csv'
 
     mapping_supplier_invoice_template = {
         'f.ref': 'invoice_number_gen',
@@ -73,17 +80,23 @@ if __name__ == '__main__':
         'extra.steuerjahr': 'taxation_year'
         }
 
-    # mapping1 = {'s.nom': 'company_name', 's.client': 'status_customer', 's.fournisseur': 'status_supplier',
-    #            's.status': '1', 's.code_client': 'auto', 's.code_fournisseur': 'auto', 's.address': 'address_parts[0]',
-    #            's.zip': 'address_parts[1]', 's.town': 'address_parts[2]'}
-    # mapping2 = {'s.fk_soc': 'company_name', 's.firstname': 'first_name', 's.lastname': 'last_name',
-    #            's.address': 'address_parts[0]', 's.zip': 'address_parts[1]', 's.town': 'address_parts[2]',
-    #            's.email': 'email'}
 
     data_structure = []
     data_structure.append(read_structure(supplier_invoice_template, mapping_supplier_invoice_template))
 
     data_structure.append(read_structure(supplier_invoice_items_template, mapping_supplier_invoice_items_template))
+
+    input_data_df = pd.read_csv(data_from_libreoffice, sep=';')
+    # print(input_data_df.tail(30))
+    print(input_data_df.info())
+    #print(input_data_df.groupby(['Datum', 'Rechnungssteller']).median()
+    #print(input_data_df.pivot(index='Datum', columns='Rechnungssteller', values=['Posten']))
+    tbl = pd.pivot_table(input_data_df, index=['Datum','Rechnungssteller'], columns=['Posten', 'Anzahl'])
+    print(tbl.info())
+
+
+    InvoiceTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice, data_structure[0], output_file_supplier_invoice_items, data_structure[1])
+    # IT = InvoiceTransfer.input_db()
 
     print("Ende!")
 
