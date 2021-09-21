@@ -9,23 +9,10 @@ import csv
 import random
 import re
 from decode_import_file import read_structure
+from erp_basic_tools import CreateFile
 from faker import Faker
 faker = Faker('de_DE')  # locale for local sounding Names, Companies, Addresses
 
-class CreateFile:
-    def __init__(self, outputfile, outputfile_structure, **kwrest):
-        testmode = kwrest.get('test', False)  # in testmode, output is written to display instead of file
-        self.testmode = testmode
-        self.outputfile = outputfile
-        #        outputfile_structure = kwrest.get('outputfile_structure', '')
-        self.outputfile_structure = outputfile_structure
-
-    # replace dummy entries in output file (like 'company_name') with actual data
-    def replace_strings_variables(self, variable_dict):
-        outputfile_structure = self.outputfile_structure
-        for key, value in variable_dict.items():
-            outputfile_structure = re.sub(key, value, str(outputfile_structure))
-        return outputfile_structure
 
 class GeneratorBase(CreateFile):
     def __init__(self, outputfile, outputfile_structure, count, **kwrest):
@@ -37,6 +24,7 @@ class GeneratorBase(CreateFile):
         street, postcode_town = address.splitlines()
         postcode, town = postcode_town.split(' ', 1)
         return [street, postcode, town]
+
 
 class GenerateCompanyData(GeneratorBase):
     def generate(self):
