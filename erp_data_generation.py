@@ -12,21 +12,13 @@ from decode_import_file import read_structure
 from faker import Faker
 faker = Faker('de_DE')  # locale for local sounding Names, Companies, Addresses
 
-
-class GeneratorBase:
-    def __init__(self, outputfile, outputfile_structure, count, **kwrest):
+class CreateFile:
+    def __init__(self, outputfile, outputfile_structure, **kwrest):
         testmode = kwrest.get('test', False)  # in testmode, output is written to display instead of file
         self.testmode = testmode
         self.outputfile = outputfile
-#        outputfile_structure = kwrest.get('outputfile_structure', '')
+        #        outputfile_structure = kwrest.get('outputfile_structure', '')
         self.outputfile_structure = outputfile_structure
-        self.count = count
-
-    @staticmethod
-    def split_address(address):
-        street, postcode_town = address.splitlines()
-        postcode, town = postcode_town.split(' ', 1)
-        return [street, postcode, town]
 
     # replace dummy entries in output file (like 'company_name') with actual data
     def replace_strings_variables(self, variable_dict):
@@ -35,6 +27,16 @@ class GeneratorBase:
             outputfile_structure = re.sub(key, value, str(outputfile_structure))
         return outputfile_structure
 
+class GeneratorBase(CreateFile):
+    def __init__(self, outputfile, outputfile_structure, count, **kwrest):
+        super().__init__(outputfile, outputfile_structure, **kwrest)
+        self.count = count
+
+    @staticmethod
+    def split_address(address):
+        street, postcode_town = address.splitlines()
+        postcode, town = postcode_town.split(' ', 1)
+        return [street, postcode, town]
 
 class GenerateCompanyData(GeneratorBase):
     def generate(self):
@@ -176,7 +178,7 @@ if __name__ == '__main__':
     GeKontaktDatei_Template = '/home/hhhans/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.orig.V13.csv'
     # GePartnerDatei='~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_1.csv'
     # GeKontaktDatei = '~/Lokal/Labor/Dolibarr/Datenimport/Beispiel_Import_Datei_societe_2.csv'
-    GePartnerDatei='Beispiel_Import_Datei_societe_1.csv'
+    GePartnerDatei = 'Beispiel_Import_Datei_societe_1.csv'
     GeKontaktDatei = 'Beispiel_Import_Datei_societe_2.csv'
 
     mapping1 = {'s.nom': 'company_name', 's.client': 'status_customer', 's.fournisseur': 'status_supplier',
@@ -193,5 +195,5 @@ if __name__ == '__main__':
     data_structure.append(read_structure(GeKontaktDatei_Template, mapping2))
     # CG = GenerateCompanyData(GePartnerDatei, data_structure[0], 3)
     # CG.generate()
-    generate_persondata_and_companydata(50, 20, GePartnerDatei, GeKontaktDatei, data_structure, test=True)
+    generate_persondata_and_companydata(50, 20, GePartnerDatei, GeKontaktDatei, data_structure, test=False)
 
