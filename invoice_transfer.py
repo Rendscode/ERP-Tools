@@ -17,8 +17,16 @@ class TransferSupplierInvoices(CreateFile):
         self.outputfile_invoice_items = outputfile_invoice_items
         self.outputfile_structure_invoice_items = outputfile_structure_invoice_items
 
+    @staticmethod
+    def generate_transaction_number(number_format, start, increment=1):
+        if start < 0:
+            start = 0
+        raw_number = start - 1 + increment
+        search_pattern = r"{.+}"
+        number_gen = re.sub(search_pattern, raw_number)
+        return number_gen
 
-# Press the green button in the gutter to run the script.
+
 if __name__ == '__main__':
     data_from_libreoffice = '/home/hhhans/Lokal/Dolibarr/Datenmigration KalkulationWattwurm/Export aus KalkulationWattwurmDB.csv'
     supplier_invoice_template = '/home/hhhans/Lokal/Dolibarr/Datenmigration KalkulationWattwurm/Beispiel_Import_Datei_fournisseur_1.V14.csv'
