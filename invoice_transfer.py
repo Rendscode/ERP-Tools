@@ -86,14 +86,12 @@ if __name__ == '__main__':
 
     data_structure.append(read_structure(supplier_invoice_items_template, mapping_supplier_invoice_items_template))
 
-    input_data_df = pd.read_csv(data_from_libreoffice, sep=';')
-    # print(input_data_df.tail(30))
-    print(input_data_df.info())
-    #print(input_data_df.groupby(['Datum', 'Rechnungssteller']).median()
-    #print(input_data_df.pivot(index='Datum', columns='Rechnungssteller', values=['Posten']))
-    tbl = pd.pivot_table(input_data_df, index=['Datum','Rechnungssteller'], columns=['Posten', 'Anzahl'])
-    print(tbl.info())
+    input_data_df = pd.read_csv(data_from_libreoffice, sep=';', decimal=',', dayfirst=True, parse_dates=["Datum"])
 
+    input_data_grp = input_data_df.groupby(['Datum', 'Rechnungssteller'])
+
+    for (Datum, Rechnungssteller), frame in input_data_grp:
+        print(Rechnungssteller, frame.Einzelpreis, frame.Anzahl, frame.Einzelpreis * frame.Anzahl, end="\n\n")
 
     InvoiceTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice, data_structure[0], output_file_supplier_invoice_items, data_structure[1])
     # IT = InvoiceTransfer.input_db()
