@@ -21,9 +21,12 @@ class TransferSupplierInvoices(CreateFile):
     def generate_transaction_number(number_format, start, increment=1):
         if start < 0:
             start = 0
-        raw_number = start - 1 + increment
+        else:
+            start = int(start)
+
+        raw_number = str(start - 1 + increment)
         search_pattern = r"{.+}"
-        number_gen = re.sub(search_pattern, raw_number)
+        number_gen = re.sub(search_pattern, raw_number, number_format)
         return number_gen
 
 
