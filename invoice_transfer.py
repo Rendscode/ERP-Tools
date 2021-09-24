@@ -24,8 +24,10 @@ class TransferSupplierInvoices(CreateFile):
         else:
             start = int(start)
 
-        raw_number = str(start - 1 + increment)
-        search_pattern = r"{.+}"
+        search_pattern = r"{(.+)}"
+        string_of_zeros = re.search(search_pattern, number_format)
+        leading_zeros = len(string_of_zeros.group(1))
+        raw_number = str(start - 1 + increment).zfill(leading_zeros)
         number_gen = re.sub(search_pattern, raw_number, number_format)
         return number_gen
 
@@ -101,11 +103,13 @@ if __name__ == '__main__':
 
     input_data_grp = input_data_df.groupby(['Datum', 'Rechnungssteller'])
 
-    for (Datum, Rechnungssteller), frame in input_data_grp:
-        print(Rechnungssteller, frame.Einzelpreis, frame.Anzahl, frame.Einzelpreis * frame.Anzahl, end="\n\n")
+    # for (Datum, Rechnungssteller), frame in input_data_grp:
+    #     print(Rechnungssteller, frame.Einzelpreis, frame.Anzahl, frame.Einzelpreis * frame.Anzahl, end="\n\n")
 
     InvoiceTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice, data_structure[0], output_file_supplier_invoice_items, data_structure[1])
     # IT = InvoiceTransfer.input_db()
+    # numb = InvoiceTransfer.generate_transaction_number('LR-{0000}', 1)
+    print(numb)
 
     print("Ende!")
 
