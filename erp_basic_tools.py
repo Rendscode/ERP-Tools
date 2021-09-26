@@ -23,3 +23,17 @@ class CreateFile:
             dbwriter = csv.writer(csvfile, delimiter=',',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
             dbwriter.writerow(eval(row_output))
+
+
+def generate_transaction_number(number_format, start, increment=1):
+    if start < 0:
+        start = 0
+    else:
+        start = int(start)
+
+    search_pattern = r"{(.+)}"
+    string_of_zeros = re.search(search_pattern, number_format)
+    leading_zeros = len(string_of_zeros.group(1))
+    raw_number = str(start - 1 + increment).zfill(leading_zeros)
+    number_gen = re.sub(search_pattern, raw_number, number_format)
+    return number_gen

@@ -5,7 +5,7 @@ from decode_import_file import read_structure  # function to determine data orde
 # import csv
 import re
 import pandas as pd
-from erp_basic_tools import CreateFile
+from erp_basic_tools import CreateFile, generate_transaction_number
 
 class TransferSupplierInvoices(CreateFile):
     def __init__(self, input_data, outputfile_invoice, outputfile_structure_invoice, outputfile_invoice_items, outputfile_structure_invoice_items, **kwrest):
@@ -16,20 +16,6 @@ class TransferSupplierInvoices(CreateFile):
         self.outputfile_structure_invoice = outputfile_structure_invoice
         self.outputfile_invoice_items = outputfile_invoice_items
         self.outputfile_structure_invoice_items = outputfile_structure_invoice_items
-
-    @staticmethod
-    def generate_transaction_number(number_format, start, increment=1):
-        if start < 0:
-            start = 0
-        else:
-            start = int(start)
-
-        search_pattern = r"{(.+)}"
-        string_of_zeros = re.search(search_pattern, number_format)
-        leading_zeros = len(string_of_zeros.group(1))
-        raw_number = str(start - 1 + increment).zfill(leading_zeros)
-        number_gen = re.sub(search_pattern, raw_number, number_format)
-        return number_gen
 
 
 if __name__ == '__main__':
@@ -103,13 +89,20 @@ if __name__ == '__main__':
 
     input_data_grp = input_data_df.groupby(['Datum', 'Rechnungssteller'])
 
-    # for (Datum, Rechnungssteller), frame in input_data_grp:
-    #     print(Rechnungssteller, frame.Einzelpreis, frame.Anzahl, frame.Einzelpreis * frame.Anzahl, end="\n\n")
-
+    transaction_number = 0
     InvoiceTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice, data_structure[0], output_file_supplier_invoice_items, data_structure[1])
+
+
+    for (Datum, Rechnungssteller), frame in input_data_grp:
+    #     print(Rechnungssteller, frame.Einzelpreis, frame.Anzahl, frame.Einzelpreis * frame.Anzahl, end="\n\n")
+        invoice_number_gen = generate_transaction_number('LR-{0000}', transaction_number)
+        transaction_number += 1
+
+        invoice_number_db = frame.Rechnungsnr
+
+        print(invoice_number_gen, invoice_number_db)
     # IT = InvoiceTransfer.input_db()
-    # numb = InvoiceTransfer.generate_transaction_number('LR-{0000}', 1)
-    print(numb)
+
 
     print("Ende!")
 
