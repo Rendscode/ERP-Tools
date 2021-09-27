@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     input_data_grp = input_data_df.groupby(['Datum', 'Rechnungssteller'])
 
-    transaction_number = 0
+    transaction_number = 1
     InvoiceTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice, data_structure[0], output_file_supplier_invoice_items, data_structure[1])
 
 
@@ -98,9 +98,13 @@ if __name__ == '__main__':
         invoice_number_gen = generate_transaction_number('LR-{0000}', transaction_number)
         transaction_number += 1
 
-        invoice_number_db = frame.Rechnungsnr
+        invoice_number_db = frame.Rechnungsnummer.values
+        supplier_name_db = frame.Rechnungssteller.values
+        invoice_date_db = frame.Datum.values
+        price_excl_vat = frame.Einzelpreis.values if (bool(frame.Mehrwertsteuer.values is True)) else frame.Einzelpreis.values /  1.19
 
-        print(invoice_number_gen, invoice_number_db)
+
+        print(invoice_number_gen, invoice_number_db, supplier_name_db, invoice_date_db, price_excl_vat, end='\n')
     # IT = InvoiceTransfer.input_db()
 
 
