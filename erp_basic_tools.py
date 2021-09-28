@@ -21,7 +21,7 @@ class CreateFile:
         row_output = self.replace_strings_variables(output_dict)  # replace strings in document raw structure with created oontent
         with open(self.outputfile, 'a+', newline='') as csvfile:
             dbwriter = csv.writer(csvfile, delimiter=',',
-                                  quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                                  quotechar="'", quoting=csv.QUOTE_MINIMAL)
             dbwriter.writerow(eval(row_output))
 
 
