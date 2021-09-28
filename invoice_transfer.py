@@ -9,6 +9,7 @@ from erp_basic_tools import CreateFile, generate_transaction_number
 
 class TransferSupplierInvoices(CreateFile):
     def __init__(self, input_data, outputfile_invoice, outputfile_structure_invoice, outputfile_invoice_items, outputfile_structure_invoice_items, **kwrest):
+        super().__init__(outputfile_invoice, outputfile_structure_invoice, **kwrest)
         testmode = kwrest.get('test', False)  # in testmode, output is written to display instead of file
         self.testmode = testmode
         self.input_data = input_data
@@ -99,8 +100,8 @@ if __name__ == '__main__':
         transaction_number += 1
 
         # data for supplier_invoice
-        invoice_number_db = frame.Rechnungsnummer.values
-        supplier_name_db = frame.Rechnungssteller.values
+        invoice_number_db = str(pd.unique(frame.Rechnungsnummer.values)[0])
+        supplier_name_db = str(pd.unique(frame.Rechnungssteller.values)[0])
         invoice_date_db = frame.Datum.values
         amount_price = frame.Einzelpreis.values * frame.Anzahl.values
         price_excl_vat_array = amount_price if (bool(frame.Mehrwertsteuer.values is True)) else amount_price / 1.19
@@ -110,11 +111,11 @@ if __name__ == '__main__':
         amount_vat = price_incl_vat - price_excl_vat
 
         # data for supplier_invoice_items
-
-
         print(invoice_number_gen, invoice_number_db, pd.unique(supplier_name_db), pd.unique(invoice_date_db), price_excl_vat_array, price_excl_vat, end='\n')
-    # IT = InvoiceTransfer.input_db()
-
+        supplier_invoice_dict = {'invoice_number_gen': invoice_number_gen, 'invoice_number_db': invoice_number_db,
+                        'supplier_name_db': supplier_name_db, 'invoice_date_db': str(pd.to_datetime(invoice_date_db).date[0]),
+                        'price_excl_vat': str(price_excl_vat), 'price_incl_vat': str(price_incl_vat), 'amount_vat': str(amount_vat)}
+        InvoiceTransfer.output_csv(supplier_invoice_dict)
 
     print("Ende!")
 
