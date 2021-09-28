@@ -98,13 +98,21 @@ if __name__ == '__main__':
         invoice_number_gen = generate_transaction_number('LR-{0000}', transaction_number)
         transaction_number += 1
 
+        # data for supplier_invoice
         invoice_number_db = frame.Rechnungsnummer.values
         supplier_name_db = frame.Rechnungssteller.values
         invoice_date_db = frame.Datum.values
-        price_excl_vat = frame.Einzelpreis.values if (bool(frame.Mehrwertsteuer.values is True)) else frame.Einzelpreis.values /  1.19
+        amount_price = frame.Einzelpreis.values * frame.Anzahl.values
+        price_excl_vat_array = amount_price if (bool(frame.Mehrwertsteuer.values is True)) else amount_price / 1.19
+        price_excl_vat = price_excl_vat_array.sum().round(2)
+        price_incl_vat_array = price_excl_vat_array * 1.19  # it would have been less code to just mutliply price_excl_vat by vat_rate, but the chosen solution should be nmore precise in terms of results
+        price_incl_vat = price_incl_vat_array.sum().round(2)
+        amount_vat = price_incl_vat - price_excl_vat
+
+        # data for supplier_invoice_items
 
 
-        print(invoice_number_gen, invoice_number_db, supplier_name_db, invoice_date_db, price_excl_vat, end='\n')
+        print(invoice_number_gen, invoice_number_db, pd.unique(supplier_name_db), pd.unique(invoice_date_db), price_excl_vat_array, price_excl_vat, end='\n')
     # IT = InvoiceTransfer.input_db()
 
 
