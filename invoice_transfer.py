@@ -108,7 +108,7 @@ if __name__ == '__main__':
         price_excl_vat = price_excl_vat_array.sum().round(2)
         price_incl_vat_array = price_excl_vat_array * 1.19  # it would have been less code to just mutliply price_excl_vat by vat_rate, but the chosen solution should be nmore precise in terms of results
         price_incl_vat = price_incl_vat_array.sum().round(2)
-        amount_vat = price_incl_vat - price_excl_vat
+        amount_vat = round(price_incl_vat - price_excl_vat, 2)
 
         # data for supplier_invoice_items
         print(invoice_number_gen, invoice_number_db, pd.unique(supplier_name_db), pd.unique(invoice_date_db), price_excl_vat_array, price_excl_vat, end='\n')

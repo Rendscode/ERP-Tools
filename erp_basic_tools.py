@@ -13,16 +13,27 @@ class CreateFile:
     # replace dummy entries in output file (like 'company_name') with actual data
     def replace_strings_variables(self, variable_dict):
         outputfile_structure = self.outputfile_structure
+        outputfile_structure = ', '.join(outputfile_structure)
+        #outputfile_structure = str(outputfile_structure)
         for key, value in variable_dict.items():
-            outputfile_structure = re.sub(key, value, str(outputfile_structure))
+            if bool(re.search(r",", value)):
+                # value = "%r"%value
+                # value = repr(value)
+                value = re.sub(r",", "\\\c", value)
+                # value = repr(value)
+            #outputfile_structure = re.sub(key, value, outputfile_structure)
+            outputfile_structure = outputfile_structure.replace(key, value)
         return outputfile_structure
 
     def output_csv(self, output_dict):
         row_output = self.replace_strings_variables(output_dict)  # replace strings in document raw structure with created oontent
+        row_output = row_output.split(',')
         with open(self.outputfile, 'a+', newline='') as csvfile:
             dbwriter = csv.writer(csvfile, delimiter=',',
                                   quotechar="'", quoting=csv.QUOTE_MINIMAL)
-            dbwriter.writerow(eval(row_output))
+            # dbwriter.writerow(eval(row_output))
+            dbwriter.writerow(row_output)
+
 
 
 def generate_transaction_number(number_format, start, increment=1):
