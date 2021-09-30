@@ -73,7 +73,7 @@ if __name__ == '__main__':
         'fd.date_end': '',
         'fd.fk_unit': '',
         'extra.kostenart': 'cost_class',
-        'extra.zusatzschluessel': 'supplementary_key',
+        'extra.zusatzschluessel': 'auxiliary_key',
         'extra.steuerkategorie': 'tax_class',
         'extra.privatanteil': 'tax_private_ratio',
         'extra.anmerkung': 'annotation',
@@ -110,12 +110,26 @@ if __name__ == '__main__':
         price_incl_vat = price_incl_vat_array.sum().round(2)
         amount_vat = round(price_incl_vat - price_excl_vat, 2)
 
-        # data for supplier_invoice_items
-        print(invoice_number_gen, invoice_number_db, pd.unique(supplier_name_db), pd.unique(invoice_date_db), price_excl_vat_array, price_excl_vat, end='\n')
+        print(invoice_number_gen, invoice_number_db, pd.unique(supplier_name_db), pd.unique(invoice_date_db),
+          price_excl_vat_array, price_excl_vat, end='\n')
+
         supplier_invoice_dict = {'invoice_number_gen': invoice_number_gen, 'invoice_number_db': invoice_number_db,
                         'supplier_name_db': supplier_name_db, 'invoice_date_db': str(pd.to_datetime(invoice_date_db).date[0]),
                         'price_excl_vat': str(price_excl_vat), 'price_incl_vat': str(price_incl_vat), 'amount_vat': str(amount_vat)}
-        InvoiceTransfer.output_csv(supplier_invoice_dict)
+        #InvoiceTransfer.output_csv(supplier_invoice_dict)
+
+        # data for supplier_invoice_items
+        item = frame.Posten
+        item_price_excl_vat = price_excl_vat_array.round(2)
+        item_price_incl_vat = price_incl_vat_array.round(2)
+        item_count = frame.Anzahl.values
+        cost_class = frame.Kostenart.values
+        auxiliary_key = frame.Zusatzschlüssel.values
+        tax_class = frame.Steuerkategorie.values
+        tax_private_ratio = frame.Privatanteil.values
+        annotation = frame.Anmerkung.values
+        taxation_year = frame.Steuerjahr.values
+        pass
 
     print("Ende!")
 
