@@ -119,7 +119,7 @@ if __name__ == '__main__':
         #InvoiceTransfer.output_csv(supplier_invoice_dict)
 
         # data for supplier_invoice_items
-        item = frame.Posten
+        item = frame.Posten.values
         item_price_excl_vat = price_excl_vat_array.round(2)
         item_price_incl_vat = price_incl_vat_array.round(2)
         item_count = frame.Anzahl.values
@@ -129,6 +129,14 @@ if __name__ == '__main__':
         tax_private_ratio = frame.Privatanteil.values
         annotation = frame.Anmerkung.values
         taxation_year = frame.Steuerjahr.values
+
+        supplier_invoice_item_dict = {'invoice_number_gen': invoice_number_gen, 'item': item,
+                                 'item_price_excl_vat': str(item_price_excl_vat),
+                                 'item_price_incl_vat': str(item_price_incl_vat),
+                                 'cost_class': cost_class, 'auxiliary_key': auxiliary_key,
+                                 'tax_class': tax_class, 'tax_private_ratio': tax_private_ratio,
+                                 'annotation': annotation, 'taxation_year': taxation_year
+                                 }
         pass
 
     print("Ende!")
