@@ -8,16 +8,13 @@ import pandas as pd
 from erp_basic_tools import CreateFile, generate_transaction_number
 
 class TransferSupplierInvoices(CreateFile):
-    def __init__(self, input_data, outputfile_invoice, outputfile_structure_invoice, outputfile_invoice_items, outputfile_structure_invoice_items, **kwrest):
-        super().__init__(outputfile_invoice, outputfile_structure_invoice, **kwrest)
+    def __init__(self, input_data, outputfile, outputfile_structure, **kwrest):
+        super().__init__(outputfile, outputfile_structure, **kwrest)
         testmode = kwrest.get('test', False)  # in testmode, output is written to display instead of file
         self.testmode = testmode
         self.input_data = input_data
-        self.outputfile_invoice = outputfile_invoice
-        self.outputfile_structure_invoice = outputfile_structure_invoice
-        self.outputfile_invoice_items = outputfile_invoice_items
-        self.outputfile_structure_invoice_items = outputfile_structure_invoice_items
-
+        self.outputfile_invoice = outputfile
+        self.outputfile_structure_invoice = outputfile_structure
 
 if __name__ == '__main__':
     data_from_libreoffice = '/home/hhhans/Lokal/Dolibarr/Datenmigration KalkulationWattwurm/Export aus KalkulationWattwurmDB.csv'
@@ -91,7 +88,8 @@ if __name__ == '__main__':
     input_data_grp = input_data_df.groupby(['Datum', 'Rechnungssteller'])
 
     transaction_number = 1
-    InvoiceTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice, data_structure[0], output_file_supplier_invoice_items, data_structure[1])
+    InvoiceTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice, data_structure[0])
+    InvoiceItemTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice_items, data_structure[1])
 
 
     for (Datum, Rechnungssteller), frame in input_data_grp:
@@ -118,6 +116,7 @@ if __name__ == '__main__':
                         'price_excl_vat': str(price_excl_vat), 'price_incl_vat': str(price_incl_vat), 'amount_vat': str(amount_vat)}
         #InvoiceTransfer.output_csv(supplier_invoice_dict)
 
+
         # data for supplier_invoice_items
         item = frame.Posten.values
         item_price_excl_vat = price_excl_vat_array.round(2)
@@ -130,13 +129,17 @@ if __name__ == '__main__':
         annotation = frame.Anmerkung.values
         taxation_year = frame.Steuerjahr.values
 
-        supplier_invoice_item_dict = {'invoice_number_gen': invoice_number_gen, 'item': item,
-                                 'item_price_excl_vat': str(item_price_excl_vat),
-                                 'item_price_incl_vat': str(item_price_incl_vat),
-                                 'cost_class': cost_class, 'auxiliary_key': auxiliary_key,
-                                 'tax_class': tax_class, 'tax_private_ratio': tax_private_ratio,
-                                 'annotation': annotation, 'taxation_year': taxation_year
+        #if transaction_number == 5:
+        supplier_invoice_item_dict = {'invoice_number_gen': invoice_number_gen, 'item': item.tolist(),
+                                 'item_price_excl_vat': item_price_excl_vat.tolist(),
+                                 'item_price_incl_vat': item_price_incl_vat.tolist(), 'item_count': item_count.tolist(),
+                                 'cost_class': cost_class.tolist(), 'auxiliary_key': auxiliary_key.tolist(),
+                                 'tax_class': tax_class.tolist(), 'tax_private_ratio': tax_private_ratio.tolist(),
+                                 'annotation': annotation.tolist(), 'taxation_year': taxation_year.tolist()
                                  }
+        supplier_invoice_item_df = pd.DataFrame.from_dict(supplier_invoice_item_dict)
+        for index, row in supplier_invoice_item_df.iterrows():
+            InvoiceItemTransfer.output_csv(row.to_dict())
         pass
 
     print("Ende!")
