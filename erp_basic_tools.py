@@ -3,8 +3,6 @@
 import re
 import csv
 
-import numpy as np
-
 
 class CreateFile:
     def __init__(self, outputfile, outputfile_structure, **kwrest):
@@ -13,37 +11,17 @@ class CreateFile:
         self.outputfile = outputfile
         self.outputfile_structure = outputfile_structure
 
-    # make multiple dicts with single entries from single dict with numpy.array entries
-    def dict_with_arrays_to_multiple_dicts(self, data_dict):
-        ndim_count = 0
-        for value in data_dict:
-            if np.ndim(value) != 0:
-                ndim_count += 1
-        if ndim_count == 0:
-            single_data_dict = data_dict
-        else:
-            single_data_dict = {}
-            for key, value in data_dict:
-                for val in value:
-                    single_data_dict[key] = val
-        yield single_data_dict
-
-        # if ndim_count > 0:
-        #     for key, value in data_dict:
-        #         return ndim_count
 
     # replace dummy entries in output file (like 'company_name') with actual data
-    def replace_strings_variables(self, stacked_dict):
+    def replace_strings_variables(self, variable_dict):
         outputfile_structure = str(self.outputfile_structure)
-        for variable_dict in self.dict_with_arrays_to_multiple_dicts(stacked_dict):
-            for key, value in variable_dict.items():
-                if type(value) != str:
-                    value = str(value)
-                if bool(re.search("'", value)):
-                    value = value.replace("'", "\\\'")
-                # key = str('r"^' + key + '\b"')
-                key = str("'" + key + "'")
-                outputfile_structure = re.sub(key, str("'" + value + "'"), outputfile_structure)
+        for key, value in variable_dict.items():
+            if type(value) != str:
+                value = str(value)
+            if bool(re.search("'", value)):
+                value = value.replace("'", "\\\'")
+            key = str("'" + key + "'")
+            outputfile_structure = re.sub(key, str("'" + value + "'"), outputfile_structure)
 
         return outputfile_structure
 

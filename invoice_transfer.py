@@ -114,7 +114,7 @@ if __name__ == '__main__':
         supplier_invoice_dict = {'invoice_number_gen': invoice_number_gen, 'invoice_number_db': invoice_number_db,
                         'supplier_name_db': supplier_name_db, 'invoice_date_db': str(pd.to_datetime(invoice_date_db).date[0]),
                         'price_excl_vat': str(price_excl_vat), 'price_incl_vat': str(price_incl_vat), 'amount_vat': str(amount_vat)}
-        #InvoiceTransfer.output_csv(supplier_invoice_dict)
+        InvoiceTransfer.output_csv(supplier_invoice_dict)
 
 
         # data for supplier_invoice_items
