@@ -90,11 +90,13 @@ if __name__ == '__main__':
     transaction_number = 1
     InvoiceTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice, data_structure[0])
     InvoiceItemTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice_items, data_structure[1])
+    #transaction_number_format = 'LR-{0000}'
+    transaction_number_format = '(PROV{0000})'
 
 
     for (Datum, Rechnungssteller), frame in input_data_grp:
     #     print(Rechnungssteller, frame.Einzelpreis, frame.Anzahl, frame.Einzelpreis * frame.Anzahl, end="\n\n")
-        invoice_number_gen = generate_transaction_number('LR-{0000}', transaction_number)
+        invoice_number_gen = generate_transaction_number(transaction_number_format, transaction_number)
         transaction_number += 1
 
         # data for supplier_invoice
