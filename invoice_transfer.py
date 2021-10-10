@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
     data_structure.append(read_structure(supplier_invoice_items_template, mapping_supplier_invoice_items_template))
 
-    input_data_df = pd.read_csv(data_from_libreoffice, sep=';', decimal=',', dayfirst=True, parse_dates=["Datum"])
+    input_data_df = pd.read_csv(data_from_libreoffice, sep=';', decimal=',', dayfirst=True, parse_dates=["Datum"], na_filter=False)
 
     input_data_grp = input_data_df.groupby(['Datum', 'Rechnungssteller'])
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
         transaction_number += 1
 
         # data for supplier_invoice
-        invoice_number_db = str(pd.unique(frame.Rechnungsnummer.values)[0])
+        invoice_number_db = str(frame.Rechnungsnummer.values[0]) + "_" + str(transaction_number-1)
         supplier_name_db = str(pd.unique(frame.Rechnungssteller.values)[0])
         invoice_date_db = frame.Datum.values
         amount_price = frame.Einzelpreis.values * frame.Anzahl.values
