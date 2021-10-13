@@ -32,11 +32,12 @@ if __name__ == '__main__':
         'f.datec': '',
         'f.datef': 'invoice_date_db',
         'f.date_lim_reglement': '',
+        'f.tva': 'tax_rate',
         'f.total_ht': 'price_excl_vat',
         'f.total_ttc': 'price_incl_vat',
         'f.total_tva': 'amount_vat',
-        'f.paye': '1',
-        'f.fk_statut': '2',
+        'f.paye': '0',
+        'f.fk_statut': '0',
         'f.fk_user_modif': '',
         'f.fk_user_valid': '',
         'f.fk_facture_source': '',
@@ -62,7 +63,7 @@ if __name__ == '__main__':
         'fd.remise_percent': '',
         'fd.vat_src_code': '',
         'fd.product_type': '',
-        'fd.tva_tx': '',
+        'fd.tva_tx': 'tax_rate',
         'fd.total_ht': '',
         'fd.tva': '',
         'fd.total_ttc': '',
@@ -92,6 +93,7 @@ if __name__ == '__main__':
     InvoiceItemTransfer = TransferSupplierInvoices(input_data_df, output_file_supplier_invoice_items, data_structure[1])
     #transaction_number_format = 'LR-{0000}'
     transaction_number_format = '(PROV{0000})'
+    tax_rate = 19 #VAT for Germany
 
 
     for (Datum, Rechnungssteller), frame in input_data_grp:
@@ -114,7 +116,7 @@ if __name__ == '__main__':
           price_excl_vat_array, price_excl_vat, end='\n')
 
         supplier_invoice_dict = {'invoice_number_gen': invoice_number_gen, 'invoice_number_db': invoice_number_db,
-                        'supplier_name_db': supplier_name_db, 'invoice_date_db': str(pd.to_datetime(invoice_date_db).date[0]),
+                        'supplier_name_db': supplier_name_db, 'invoice_date_db': str(pd.to_datetime(invoice_date_db).date[0]), 'tax_rate': tax_rate,
                         'price_excl_vat': str(price_excl_vat), 'price_incl_vat': str(price_incl_vat), 'amount_vat': str(amount_vat)}
         InvoiceTransfer.output_csv(supplier_invoice_dict)
 
@@ -128,12 +130,13 @@ if __name__ == '__main__':
         auxiliary_key = frame.Zusatzschlüssel.values
         tax_class = frame.Steuerkategorie.values
         tax_private_ratio = frame.Privatanteil.values
+        tax_private_ratio[tax_private_ratio == 'true'] = 1
         annotation = frame.Anmerkung.values
         taxation_year = frame.Steuerjahr.values
 
         #if transaction_number == 5:
         supplier_invoice_item_dict = {'invoice_number_gen': invoice_number_gen, 'item': item.tolist(),
-                                 'item_price_excl_vat': item_price_excl_vat.tolist(),
+                                 'tax_rate': tax_rate, 'item_price_excl_vat': item_price_excl_vat.tolist(),
                                  'item_price_incl_vat': item_price_incl_vat.tolist(), 'item_count': item_count.tolist(),
                                  'cost_class': cost_class.tolist(), 'auxiliary_key': auxiliary_key.tolist(),
                                  'tax_class': tax_class.tolist(), 'tax_private_ratio': tax_private_ratio.tolist(),
