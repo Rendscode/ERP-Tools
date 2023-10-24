@@ -1,8 +1,8 @@
-# FakeDataCreation
+# Dummy Data for Dolibarr ERP
 
 ## Keywords: Dolibarr, ERP, company data, test
 
-This set of functions creates fake data for the open source ERP System dolibarr. Currently data can be created for instances of companies and (person) contacts within these companies.
+This set of functions creates fake company and contact data for the open source ERP System dolibarr. Currently data can be created for instances of companies and (person) contacts within these companies.
 
 ## Motivation
 In order to demonstrate the capabilities of Dolibarr to prospects it's helpful to have a significant number of (dummy) contacts with different categories
